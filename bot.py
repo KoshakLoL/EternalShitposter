@@ -16,20 +16,28 @@ class MainBot:
     def main(self):
         for event in self.long_poll.listen():
             if event.type == VkBotEventType.MESSAGE_NEW:
-                if self.group_id in event.obj.text or self.score == 10:
-                    msg_recipient = event.obj.peer_id
-                    final = (get_file_array("array1.txt") +
-                             get_file_array("array2.txt") +
-                             get_file_array("array3.txt")).replace("\n", "")
-
-                    self.vk.messages.send(
+                if event.obj.peer_id < 2000000000:
+                        msg_recipient = event.obj.peer_id
+                        self.vk.messages.send(
                         peer_id=msg_recipient,
                         random_id=get_random_id(),
-                        message=final
-                    )
-                    self.score = 0
+                        message="Please add me to a group chat, I don't work in private messages!"
+                        )
                 else:
-                    self.score += 1
+                        if self.group_id in event.obj.text or self.score == 10:
+                                msg_recipient = event.obj.peer_id
+                                final = (get_file_array("array1.txt") +
+                                        get_file_array("array2.txt") +
+                                        get_file_array("array3.txt")).replace("\n", "")
+
+                                self.vk.messages.send(
+                                        peer_id=msg_recipient,
+                                        random_id=get_random_id(),
+                                        message=final
+                                )
+                                self.score = 0
+                        else:
+                                self.score += 1
 
 
 def get_file_array(file):
