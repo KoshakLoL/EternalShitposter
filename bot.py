@@ -37,6 +37,6 @@ def get_file_array(file):
         return choice(list(array))
 
 
-bot = MainBot("1572a1f3b0c5732276207571fa4a74fa53de2a826c6d719ce8d98cfb761eb4cba36e10e26fe144caa99c0", "200700644")
+bot = MainBot("token", "group_id")
 if __name__ == "__main__":
     bot.main()
