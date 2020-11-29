@@ -14,7 +14,7 @@ class MainBot:
         self.vk = self.vk_session.get_api()
         self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
         self.db = db
-        self.score = self.db.get_score(self.group_id)
+        self.score = 0
 
     def main(self):
         for event in self.long_poll.listen():
@@ -27,6 +27,7 @@ class MainBot:
                         message="Please add me to a group chat, I don't work in private messages!"
                     )
                 else:
+                    self.score = self.db.get_score(msg_recipient)
                     if self.group_id in event.obj.text or self.score == 10:
                         final = (get_file_array("array1.txt") +
                                  get_file_array("array2.txt") +
@@ -40,7 +41,7 @@ class MainBot:
                         self.score = 1
                     else:
                         self.score += 1
-                    self.db.update_chat(self.group_id, self.score)
+                    self.db.update_chat(str(event.obj.peer_id), self.score)
                     print(self.db.get_scores())
 
 
