@@ -24,5 +24,5 @@ class DataBase:
             print("Value doesn't exist! Returning 0...")
             return 0
 
-    def close_db(self):
+    def __del__(self):
         self.db.close()

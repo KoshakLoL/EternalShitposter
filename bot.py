@@ -21,16 +21,22 @@ class MainBot:
             if event.type == VkBotEventType.MESSAGE_NEW:
                 msg_recipient = event.obj.peer_id
                 if msg_recipient < 2000000000:
-                    self.vk.messages.send(message_construct(
-                        msg_recipient,
-                        "Please add me to a group chat, I don't work in private messages!"))
+                    self.vk.messages.send(
+                        peer_id=msg_recipient,
+                        random_id=get_random_id(),
+                        message="Please add me to a group chat, I don't work in private messages!"
+                    )
                 else:
                     if self.group_id in event.obj.text or self.score == 10:
                         final = (get_file_array("array1.txt") +
                                  get_file_array("array2.txt") +
                                  get_file_array("array3.txt")).replace("\n", "")
 
-                        self.vk.messages.send(message_construct(msg_recipient, final))
+                        self.vk.messages.send(
+                            peer_id=msg_recipient,
+                            random_id=get_random_id(),
+                            message=final
+                        )
                         self.score = 1
                     else:
                         self.score += 1
@@ -42,12 +48,7 @@ def get_file_array(file):
         return choice(list(array))
 
 
-def message_construct(msg_recipient, message):
-    return msg_recipient, get_random_id(), message
-
-
 database = DataBase("database")
 bot = MainBot("token", "group_id", database)
 if __name__ == "__main__":
     bot.main()
-    database.close_db()
