@@ -7,13 +7,13 @@ class DataBase:
         self.cur = self.db.cursor()
 
     def update_chat(self, group_id, score):
-        if self.cur.execute("SELECT EXISTS(SELECT * FROM chats WHERE chat=:group_id)",
-                            {"group_id": group_id}).fetchone() == (1,):
+        if self.cur.execute("SELECT EXISTS(SELECT * FROM chats WHERE chat=:chat)",
+                            {"chat": group_id}).fetchone() == (1,):
             self.cur.execute("""UPDATE chats SET score = :score
-                                 WHERE chat = :group_id
-            """, {"group_id": group_id, "score": score})
+                                 WHERE chat = :chat
+            """, {"chat": group_id, "score": score})
         else:
-            self.cur.execute("INSERT INTO chats VALUES (:group_id, :score)", {"group_id": group_id, "score": score})
+            self.cur.execute("INSERT INTO chats VALUES (:chat, :score)", {"chat": group_id, "score": score})
         self.db.commit()
 
     def get_score(self, group_id):
