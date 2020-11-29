@@ -42,7 +42,6 @@ class MainBot:
                     else:
                         self.score += 1
                     self.db.update_chat(str(event.obj.peer_id), self.score)
-                    print(self.db.get_scores())
 
 
 def get_file_array(file):
