@@ -46,7 +46,7 @@ class MainBot:
 
 def get_file_array(file):
     with open(file, "r") as array:
-        return choice(list(array))
+        return choice(list(array)) + " "
 
 
 database = DataBase("database")
