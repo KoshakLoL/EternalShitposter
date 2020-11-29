@@ -24,5 +24,9 @@ class DataBase:
             print("Value doesn't exist! Returning 0...")
             return 0
 
+    def get_scores(self):
+        self.cur.execute("SELECT * FROM chats")
+        return self.cur.fetchall()
+
     def __del__(self):
         self.db.close()
