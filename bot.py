@@ -1,63 +1,32 @@
 # -*- coding: utf-8 -*-
-import vk_api
-import subprocess
-from random import choice
-from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
-from vk_api.utils import get_random_id
-
 from database import DataBase
+from main import MainFunc
+from vk_api.bot_longpoll import VkBotEventType
 
 
-class MainBot:
+class MainBot(MainFunc):
     def __init__(self, token, group_id, db):
-        self.group_id = group_id
-        self.vk_session = vk_api.VkApi(token=token)
-        self.vk = self.vk_session.get_api()
-        self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
-        self.db = db
-        self.score = 0
+        super().__init__(token, group_id, db)
 
     def main(self):
-        for event in self.long_poll.listen():
+        for event in self.get_event_listener():
             if event.type == VkBotEventType.MESSAGE_NEW:
-                msg_recipient = event.obj.peer_id
-                if msg_recipient < 2000000000:
-                    self.vk.messages.send(
-                        peer_id=msg_recipient,
-                        random_id=get_random_id(),
-                        message="Please add me to a group chat, I don't work in private messages!"
-                    )
+                self.set_message_recipient(event)
+                if self.msg_recipient < 2000000000:
+                    self.not_group()
+                elif event.obj.text == self.group_id + " fortune":
+                    self.fortune()
                 else:
-                    if "fortune" in event.obj.text and self.group_id in event.obj.text :
-                        self.vk.messages.send(
-                        peer_id=msg_recipient,
-                        random_id=get_random_id(),
-                        message=subprocess.check_output(['fortune', '-eso'])
-                    )
+                    self.score = self.db.get_score(self.msg_recipient)
+                    if self.group_id in event.obj.text or self.score == 10:
+                        self.shitposter()
+                        self.score = 1
                     else:
-                        self.score = self.db.get_score(msg_recipient)
-                        if self.group_id in event.obj.text or self.score == 10:
-                            final = (get_file_array("array1.txt") +
-                                    get_file_array("array2.txt") +
-                                    get_file_array("array3.txt")).replace("\n", "")
-
-                            self.vk.messages.send(
-                                peer_id=msg_recipient,
-                                random_id=get_random_id(),
-                                message=final
-                            )
-                            self.score = 1
-                        else:
-                            self.score += 1
-                        self.db.update_chat(str(event.obj.peer_id), self.score)
+                        self.score += 1
+                    self.db.update_chat(str(self.msg_recipient), self.score)
 
 
-def get_file_array(file):
-    with open(file, "r") as array:
-        return choice(list(array)) + " "
-
-
-database = DataBase(database)
-bot = MainBot(token, group, database)
+database = DataBase("database")
+bot = MainBot("token", "group", database)
 if __name__ == "__main__":
     bot.main()
