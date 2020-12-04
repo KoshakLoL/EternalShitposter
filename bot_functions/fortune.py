@@ -2,4 +2,4 @@ import subprocess
 
 
 def fortune():
-    return subprocess.check_output(['fortune', '-eso'])
+    return subprocess.run(['fortune', '-eso'], capture_output=True, text=True).stdout
