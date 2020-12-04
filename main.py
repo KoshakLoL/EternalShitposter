@@ -1,8 +1,11 @@
 import vk_api
-import subprocess
-from random import choice
 from vk_api.bot_longpoll import VkBotLongPoll
 from vk_api.utils import get_random_id
+
+from msg_construct import msg_construct
+
+from bot_functions.fortune import fortune
+from bot_functions.shitposter import shitpost
 
 
 class MainFunc:
@@ -21,25 +24,14 @@ class MainFunc:
     def set_message_recipient(self, event):
         self.msg_recipient = event.obj.peer_id
 
+    def get_message_payload(self, text):
+        return self.vk, self.msg_recipient, get_random_id(), text
+
     def shitposter(self):
-        self.msg_construct((get_file_array("array1.txt") +
-                            get_file_array("array2.txt") +
-                            get_file_array("array3.txt")).replace("\n", ""))
+        msg_construct(*self.get_message_payload(shitpost()))
 
     def fortune(self):
-        self.msg_construct(subprocess.check_output(['fortune', '-eso']))
+        msg_construct(*self.get_message_payload(fortune()))
 
     def not_group(self):
-        self.msg_construct("Please add me to a group chat, I don't work in private messages!")
-
-    def msg_construct(self, message):
-        self.vk.messages.send(
-            peer_id=self.msg_recipient,
-            random_id=get_random_id(),
-            message=message
-        )
-
-
-def get_file_array(file):
-    with open(file, "r") as array:
-        return choice(list(array)) + " "
+        msg_construct(*self.get_message_payload("Please add me to a group chat, I don't work in private messages!"))

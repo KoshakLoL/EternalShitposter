@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from database import DataBase
-from main import MainFunc
 from vk_api.bot_longpoll import VkBotEventType
+
+from main import MainFunc
 
 
 class MainBot(MainFunc):
