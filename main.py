@@ -21,11 +21,11 @@ class MainFunc:
     def get_event_listener(self):
         return self.long_poll.listen()
 
-    def set_message_recipient(self, event):
-        self.msg_recipient = event.obj.peer_id
-
     def get_message_payload(self, text):
         return self.vk, self.msg_recipient, get_random_id(), text
+
+    def set_message_recipient(self, event):
+        self.msg_recipient = event.obj.peer_id
 
     def shitposter(self):
         msg_construct(*self.get_message_payload(shitpost()))
