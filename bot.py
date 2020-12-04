@@ -15,16 +15,17 @@ class MainBot(MainFunc):
                 self.set_message_recipient(event)
                 if self.msg_recipient < 2000000000:
                     self.not_group()
-                elif event.obj.text == (self.group_prefix + " fortune"):
-                    self.fortune()
+                elif self.group_id in event.obj.text:
+                    if "fortune" in event.obj.text:
+                        self.fortune()
+                        self.check_score()
+                    else:
+                        self.shitpost()
+                        self.reset_score()
                 else:
                     self.score = self.db.get_score(self.msg_recipient)
-                    if event.obj.text == self.group_prefix or self.score == 10:
-                        self.shitpost()
-                        self.score = 1
-                    else:
-                        self.score += 1
-                    self.db.update_chat(str(self.msg_recipient), self.score)
+                    self.check_score()
+                self.db.update_chat(str(self.msg_recipient), self.score)
 
 
 database = DataBase("database")
