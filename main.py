@@ -4,7 +4,7 @@ from vk_api.utils import get_random_id
 
 from msg_construct import msg_construct
 
-from bot_functions.fortune import return_fortune
+from bot_functions.fortune import fortune
 from bot_functions.shitposter import shitpost
 
 
@@ -16,7 +16,7 @@ class MainFunc:
         self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
         with vk_api.VkRequestsPool(self.vk_session) as pool:
             response = pool.method("groups.getById")
-        self.group_prefix = "[club" + self.group_id + "|" + response.result["screen_name"] + "]"
+        self.group_prefix = "[club" + self.group_id + "|" + response.result[0]["name"] + "]"
         self.db = db
         self.score = 0
         self.msg_recipient = ""
@@ -34,7 +34,7 @@ class MainFunc:
         self.set_message_payload(shitpost())
 
     def fortune(self):
-        self.set_message_payload(return_fortune())
+        self.set_message_payload(fortune())
 
     def not_group(self):
         self.set_message_payload("Please add me to a group chat, I don't work in private messages!")

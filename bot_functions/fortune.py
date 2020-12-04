@@ -1,5 +1,5 @@
-import fortune
+import subprocess
 
 
-def return_fortune():
-    return fortune.get_random_fortune("fortunes.dat")
+def fortune():
+    return subprocess.run(['fortune', '-eso'], capture_output=True, text=True).stdout

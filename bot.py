@@ -15,7 +15,7 @@ class MainBot(MainFunc):
                 self.set_message_recipient(event)
                 if self.msg_recipient < 2000000000:
                     self.not_group()
-                elif event.obj.text == self.group_prefix + " fortune":
+                elif event.obj.text == (self.group_prefix + " fortune"):
                     self.fortune()
                 else:
                     self.score = self.db.get_score(self.msg_recipient)
