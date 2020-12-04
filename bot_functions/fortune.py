@@ -1,5 +1,5 @@
-import subprocess
+import fortune
 
 
-def fortune():
-    return subprocess.check_output(['fortune', '-eso'])
+def return_fortune():
+    return fortune.get_random_fortune("fortunes.dat")

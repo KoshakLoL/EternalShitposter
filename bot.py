@@ -15,12 +15,12 @@ class MainBot(MainFunc):
                 self.set_message_recipient(event)
                 if self.msg_recipient < 2000000000:
                     self.not_group()
-                elif event.obj.text == self.group_id + " fortune":
+                elif event.obj.text == self.group_prefix + " fortune":
                     self.fortune()
                 else:
                     self.score = self.db.get_score(self.msg_recipient)
-                    if self.group_id in event.obj.text or self.score == 10:
-                        self.shitposter()
+                    if event.obj.text == self.group_prefix or self.score == 10:
+                        self.shitpost()
                         self.score = 1
                     else:
                         self.score += 1
@@ -29,5 +29,4 @@ class MainBot(MainFunc):
 
 database = DataBase("database")
 bot = MainBot("token", "group", database)
-if __name__ == "__main__":
-    bot.main()
+bot.main()
