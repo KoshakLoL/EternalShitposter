@@ -3,6 +3,8 @@ import sqlite3
 
 class DataBase:
     def __init__(self, database_file):
+        if ".db" not in database_file:
+            raise NoDatabaseFile
         self.db = sqlite3.connect(database_file)
         self.cur = self.db.cursor()
 
@@ -22,8 +24,14 @@ class DataBase:
         try:
             return self.cur.fetchone()[1]
         except TypeError:
-            print("Value doesn't exist! Returning 0...")
-            return 0
+            print("Value doesn't exist! Returning 1...")
+            return 1
 
-    def __del__(self):
+    def close_db(self):
         self.db.close()
+
+
+class NoDatabaseFile(Exception):
+    def __init__(self):
+        print("No database file in bot.py! Please add one.")
+        exit()

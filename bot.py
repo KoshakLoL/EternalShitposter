@@ -13,34 +13,34 @@ class MainBot(MainFunc):
         for event in self.get_event_listener():
             if event.type == VkBotEventType.MESSAGE_NEW:
                 self.set_message_recipient(event)
-                if event.from_user:
-                    self.not_group()
-                elif self.group_name in event.obj.text:
-                    if "fortune" in event.obj.text:
-                        self.fortune()
-                        self.add_score()
-                        self.check_score()
-                    elif "auto" in event.obj.text:
+                self.set_score(self.get_database_score())  # This is the beginning of db-local transaction
+                self.set_status(self.get_database_status())  # This is the end of db-local transaction
+                if "fortune" in event.obj.text.lower() and (event.from_user or self.group_name in event.obj.text):
+                    self.fortune()
+                    self.set_score(self.get_score() - 1)
+                elif "auto" in event.obj.text.lower() and self.group_name in event.obj.text:
+                    if event.from_chat:
                         response = self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
                                                                                group_id=self.group_id)["items"]
                         if check_for_owner(response, event):
-                            if self.auto_shitpost == 0:
-                                self.set_database_status(1)
+                            if self.get_status() == 0:
+                                self.set_status(1)
                                 self.set_message_payload("Now the bot will auto-shitpost!")
+                                self.set_score(self.get_score()-1)
                             else:
-                                self.set_database_status(0)
+                                self.set_status(0)
                                 self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
                         else:
                             self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
                     else:
-                        self.shitpost()
-                        self.reset_score()
-                self.get_database_status()
+                        self.set_message_payload("You're only allowed to use this in group chats!")
+                elif ("shitpost" in event.obj.text.lower() and event.from_user)\
+                        or (self.group_name in event.obj.text and event.from_chat):
+                    self.shitpost()
                 if self.get_status() == 1:
-                    self.get_database_score()
                     self.check_score()
-                self.set_database_score()
-                self.set_database_status(self.get_status())
+                self.set_database_score(self.get_score())  # This is the beginning of local-db transaction
+                self.set_database_status(self.get_status())  # This is the end of local-db transaction
 
 
 def check_for_owner(response, event):
@@ -59,4 +59,5 @@ if __name__ == "__main__":
     try:
         bot.main()
     except KeyboardInterrupt:
+        bot.db.close_db()
         exit()
