@@ -28,13 +28,12 @@ class MainBot(MainFunc):
                 self.db.update_chat(str(self.msg_recipient), self.score)
 
 
-database = DataBase("database")
-bot = MainBot("token",
-              "group_id",
-              database)
 if __name__ == "__main__":
+    database = DataBase("database")
+    bot = MainBot("token",
+                  "group_id",
+                  database)
     try:
         bot.main()
     except KeyboardInterrupt:
-        database.__del__()  # Forcing data-base to shutdown
         exit()
