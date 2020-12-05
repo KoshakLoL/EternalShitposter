@@ -24,7 +24,6 @@ class DataBase:
         try:
             return self.cur.fetchone()[1]
         except TypeError:
-            print("Value doesn't exist! Returning 1...")
             return 1
 
     def close_db(self):
