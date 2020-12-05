@@ -18,14 +18,24 @@ class MainBot(MainFunc):
                 elif self.group_name in event.obj.text:
                     if "fortune" in event.obj.text:
                         self.fortune()
+                        self.add_score()
                         self.check_score()
+                    elif "auto" in event.obj.text:
+                        if self.auto_shitpost == 0:
+                            self.set_database_status(1)
+                            self.set_message_payload("Now the bot will auto-shitpost!")
+                        else:
+                            self.set_database_status(0)
+                            self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
                     else:
                         self.shitpost()
                         self.reset_score()
-                else:
-                    self.score = self.db.get_score(self.msg_recipient)
+                self.get_database_status()
+                if self.get_status() == 1:
+                    self.get_database_score()
                     self.check_score()
-                self.db.update_chat(str(self.msg_recipient), self.score)
+                self.set_database_score()
+                self.set_database_status(self.get_status())
 
 
 if __name__ == "__main__":

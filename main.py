@@ -17,6 +17,7 @@ class MainFunc:
         self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
         self.db = db
         self.score = 0
+        self.auto_shitpost = 1
         self.msg_recipient = ""
 
     def get_event_listener(self):
@@ -28,8 +29,8 @@ class MainFunc:
     def set_message_recipient(self, event):
         self.msg_recipient = event.obj.peer_id
 
-    def add_score(self):  # This method is only useful for this class and not for any other instance
-        self.score += 1   # Deprecate, maybe?
+    def add_score(self):
+        self.score += 1
 
     def reset_score(self):
         self.score = 1
@@ -40,6 +41,21 @@ class MainFunc:
             self.reset_score()
         else:
             self.add_score()
+
+    def get_database_score(self):
+        self.score = self.db.get_value("scores", self.msg_recipient)
+
+    def set_database_score(self):
+        self.db.update_value("scores", "score", self.msg_recipient, self.score)
+
+    def get_status(self):
+        return self.auto_shitpost
+
+    def get_database_status(self):
+        self.auto_shitpost = self.db.get_value("statuses", self.msg_recipient)
+
+    def set_database_status(self, status):
+        self.db.update_value("statuses", "status", self.msg_recipient, status)
 
     def shitpost(self):
         self.set_message_payload(shitpost())
