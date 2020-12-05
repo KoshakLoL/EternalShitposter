@@ -13,10 +13,8 @@ class MainFunc:
         self.vk_session = vk_api.VkApi(token=token)
         self.vk_api = self.vk_session.get_api()
         self.group_id = group_id
+        self.group_name = "club" + self.group_id
         self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
-        with vk_api.VkRequestsPool(self.vk_session) as pool:
-            response = pool.method("groups.getById")
-        self.group_prefix = "[club" + self.group_id + "|" + response.result[0]["name"] + "]"
         self.db = db
         self.score = 0
         self.msg_recipient = ""
@@ -29,6 +27,19 @@ class MainFunc:
 
     def set_message_recipient(self, event):
         self.msg_recipient = event.obj.peer_id
+
+    def add_score(self):  # This method is only useful for this class and not for any other instance
+        self.score += 1   # Deprecate, maybe?
+
+    def reset_score(self):
+        self.score = 1
+
+    def check_score(self):
+        if self.score == 10:
+            self.shitpost()
+            self.reset_score()
+        else:
+            self.add_score()
 
     def shitpost(self):
         self.set_message_payload(shitpost())
