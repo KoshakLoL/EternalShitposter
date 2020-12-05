@@ -15,7 +15,7 @@ class MainBot(MainFunc):
                 self.set_message_recipient(event)
                 if self.msg_recipient < 2000000000:
                     self.not_group()
-                elif self.group_id in event.obj.text:
+                elif self.group_name in event.obj.text:
                     if "fortune" in event.obj.text:
                         self.fortune()
                         self.check_score()
@@ -29,5 +29,10 @@ class MainBot(MainFunc):
 
 
 database = DataBase("database")
-bot = MainBot("token", "group", database)
-bot.main()
+bot = MainBot("token",
+              "group_id",
+              database)
+try:
+    bot.main()
+except KeyboardInterrupt:
+    exit()

@@ -13,6 +13,9 @@ class MainFunc:
         self.vk_session = vk_api.VkApi(token=token)
         self.vk_api = self.vk_session.get_api()
         self.group_id = group_id
+        with vk_api.VkRequestsPool(self.vk_session) as pool:
+            response = pool.method("groups.getById")
+        self.group_name = "[club" + self.group_id + "|" + response.result[0]["name"] + "]"
         self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
         self.db = db
         self.score = 0
