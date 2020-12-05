@@ -13,7 +13,7 @@ class MainFunc:
         self.vk_session = vk_api.VkApi(token=token)
         self.vk_api = self.vk_session.get_api()
         self.group_id = group_id
-        self.group_name = "[club" + self.group_id + "]"
+        self.group_name = "club" + self.group_id
         self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
         self.db = db
         self.score = 0
