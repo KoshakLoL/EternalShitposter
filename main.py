@@ -49,12 +49,6 @@ class MainFunc:
     def set_score(self, score):
         self.score = score
 
-    def check_score(self):
-        if self.get_score() >= 10:
-            self.shitpost()
-        else:
-            self.set_score(self.get_score()+1)
-
     # --- Auto-shitpost status
 
     def get_status(self):
@@ -83,7 +77,6 @@ class MainFunc:
 
     def shitpost(self):
         self.set_message_payload(shitpost())
-        self.set_score(1)
 
     def fortune(self):
         self.set_message_payload(fortune())
