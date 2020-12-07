@@ -83,6 +83,4 @@ class MainFunc:
         self.set_message_payload(shitpost())
 
     def fortune(self):  # To pick a random BSD-styled fortune from a fortunes list
-        self.set_message_payload(fortune(["fortunes/aphorisms",
-                                          "fortunes/groucho",
-                                          "fortunes/zippy"], 150))
+        self.set_message_payload(fortune())
