@@ -22,24 +22,21 @@ class MainBot(MainFunc):
                     self.fortune()
                     self.set_score(self.get_score() - 1)
 
-                elif "auto" in event.obj.text.lower() and self.group_name in event.obj.text:
-                    if event.from_chat:
-                        response = self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
-                                                                               group_id=self.group_id)["items"]
-                        if check_for_owner(response, event):
-                            if self.get_status() == 0:
-                                self.set_status(1)
-                                self.set_message_payload("Now the bot will auto-shitpost!")
-                                self.set_score(self.get_score()-1)
-                            else:
-                                self.set_status(0)
-                                self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
+                elif "auto" in event.obj.text.lower() and self.group_name in event.obj.text and event.from_chat:
+                    response = self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
+                                                                           group_id=self.group_id)["items"]
+                    if check_for_owner(response, event):
+                        if self.get_status() == 0:
+                            self.set_status(1)
+                            self.set_message_payload("Now the bot will auto-shitpost!")
+                            self.set_score(self.get_score() - 1)
                         else:
-                            self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
+                            self.set_status(0)
+                            self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
                     else:
-                        self.set_message_payload("You're only allowed to use this in group chats!")
+                        self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
 
-                elif ("shitpost" in event.obj.text.lower() and event.from_user)\
+                elif ("shitpost" in event.obj.text.lower() and event.from_user) \
                         or (self.group_name in event.obj.text and event.from_chat):
                     self.shitpost()
                     self.set_score(1)
@@ -47,9 +44,11 @@ class MainBot(MainFunc):
                 if self.get_status() == 1:
                     if self.get_score() >= 10:
                         self.shitpost()
+                        self.set_score(1)
                     else:
                         self.set_score(self.get_score() + 1)
                 # Local work END
+
                 self.set_database_score(self.get_score())  # This is the beginning of local-db transaction
                 self.set_database_status(self.get_status())  # This is the end of local-db transaction
 
