@@ -1,6 +1,6 @@
-import vk_api
+from vk_api import VkApi
+from vk_api.exceptions import ApiError
 from vk_api.bot_longpoll import VkBotLongPoll
-from vk_api.utils import get_random_id
 
 from msg_construct import msg_construct
 
@@ -10,13 +10,13 @@ from bot_functions.shitposter import shitpost
 
 class MainFunc:
     def __init__(self, token, group_id, db):
-        self.vk_session = vk_api.VkApi(token=token)
-        self.vk_api = self.vk_session.get_api()
+        self.vk_session = VkApi(token=token)  # Initializing session
+        self.vk_api = self.vk_session.get_api()  # Initializing API
         self.group_id = group_id
         self.group_name = "club" + self.group_id
         try:
-            self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)
-        except vk_api.exceptions.ApiError as e:
+            self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)  # Initializing LongPoll API
+        except ApiError as e:
             e_str = str(e)
             if "[5]" in e_str:
                 print("Token not valid!")
@@ -30,16 +30,18 @@ class MainFunc:
         self.auto_shitpost = 1
         self.msg_recipient = ""
 
-    def get_event_listener(self):
+    def get_event_listener(self):  # Return current events from a listener
         return self.long_poll.listen()
 
     # --- Messages integration
 
-    def set_message_payload(self, text):
-        msg_construct(self.vk_api, self.msg_recipient, get_random_id(), text)
+    def set_message_payload(self, text):  # Send a message to a chat
+        msg_construct(self.vk_api, self.msg_recipient, text)
 
-    def set_message_recipient(self, event):
+    def set_message_recipient(self, event):  # Set peer_id (where to send the message)
         self.msg_recipient = event.obj.peer_id
+
+    # --- LOCAL
 
     # --- Score
 
@@ -56,6 +58,8 @@ class MainFunc:
 
     def set_status(self, status):
         self.auto_shitpost = status
+
+    # --- DATABASE
 
     # --- Database scores
 
@@ -75,8 +79,10 @@ class MainFunc:
 
     # --- Methods
 
-    def shitpost(self):
+    def shitpost(self):  # To shitpost a random message from three arrays
         self.set_message_payload(shitpost())
 
-    def fortune(self):
-        self.set_message_payload(fortune())
+    def fortune(self):  # To pick a random BSD-styled fortune from a fortunes list
+        self.set_message_payload(fortune(["fortunes/aphorisms",
+                                          "fortunes/groucho",
+                                          "fortunes/zippy"], 150))
