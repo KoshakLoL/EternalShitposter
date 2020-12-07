@@ -1,5 +1,5 @@
-import subprocess
+from python_fortune import main
 
 
 def fortune():
-    return subprocess.run(['fortune', '-eso'], capture_output=True, text=True).stdout
+    return main.Fortune(["fortunes/aphorisms", "fortunes/zippy", "fortunes/groucho"]).get()
