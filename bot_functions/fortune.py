@@ -1,5 +1,6 @@
-from python_fortune import main
+from random import choice
 
 
 def fortune():
-    return main.Fortune(["fortunes/aphorisms", "fortunes/zippy", "fortunes/groucho"]).get()
+    with open("fortunes/fortunes", "r") as f:
+        return choice(list(f)[:-1]).rstrip()
