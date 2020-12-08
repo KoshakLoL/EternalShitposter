@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from database import DataBase
 from vk_api.bot_longpoll import VkBotEventType
 
