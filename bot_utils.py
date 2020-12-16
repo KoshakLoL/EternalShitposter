@@ -12,8 +12,10 @@ def msg_construct(vk, msg_recipient, message):
 def check_for_owner(response, event):
     for entry in response:
         # If it is the same member as the one who called
-        if entry["member_id"] == event.obj.from_id:
-            # If the member is admin
-            if ("is_admin" in entry and entry["is_admin"]) or ("is_owner" in entry and entry["is_owner"]):
-                return True
+        # If the member is an owner or an admin
+        if entry["member_id"] == event.obj.from_id and (
+                ("is_admin" in entry and entry["is_admin"]) or
+                ("is_owner" in entry and entry["is_owner"])
+        ):
+            return True
     return False
