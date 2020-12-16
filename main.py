@@ -2,7 +2,7 @@ from vk_api import VkApi
 from vk_api.exceptions import ApiError
 from vk_api.bot_longpoll import VkBotLongPoll
 
-from msg_construct import msg_construct
+from bot_utils import msg_construct
 
 from bot_functions.fortune import fortune
 from bot_functions.shitposter import shitpost
