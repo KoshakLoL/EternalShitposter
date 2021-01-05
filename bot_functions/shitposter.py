@@ -2,11 +2,8 @@ from random import choice
 
 
 def shitpost():
-    return (f"{get_file_array('arrays/array1.txt')}"
-            f" {get_file_array('arrays/array2.txt')}"
-            f" {get_file_array('arrays/array3.txt')}".replace("\n", ""))
-
-
-def get_file_array(file):
-    with open(file, "r") as array:
-        return choice(list(array))
+    array = []
+    for i in range(1, 4):
+        with open(f"arrays/array{i}.txt", "r") as f:
+            array.append(choice(list(f)).strip())
+    return " ".join(array)

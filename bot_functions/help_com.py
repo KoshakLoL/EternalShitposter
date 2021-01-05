@@ -10,4 +10,5 @@ def help_com():
             4. "[bot_ping] help" for this command, glad you figured it out.
             
             Good luck on using this... Shit.
+            If you want to help, come visit https://github.com/KoshakLoL/EternalShitposter !
             """)
