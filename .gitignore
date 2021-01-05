@@ -1,0 +1,9 @@
+# Database, literally
+conf_db.db
+
+# Caches
+__pycache__/
+bot_functions/__pycache__/
+
+# Idea
+.idea/

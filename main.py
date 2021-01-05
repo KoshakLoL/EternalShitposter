@@ -1,11 +1,9 @@
 from vk_api import VkApi
-from vk_api.exceptions import ApiError
 from vk_api.bot_longpoll import VkBotLongPoll
+from vk_api.exceptions import ApiError
 
+import bot_functions
 from bot_utils import msg_construct
-
-from bot_functions.fortune import fortune
-from bot_functions.shitposter import shitpost
 
 
 class MainFunc:
@@ -13,7 +11,7 @@ class MainFunc:
         self.vk_session = VkApi(token=token)  # Initializing session
         self.vk_api = self.vk_session.get_api()  # Initializing API
         self.group_id = group_id
-        self.group_name = "club" + self.group_id
+        self.group_name = f"club{self.group_id}"
         try:
             self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)  # Initializing LongPoll API
         except ApiError as e:
@@ -23,7 +21,7 @@ class MainFunc:
             elif "[100]" in e_str:
                 print("Group ID not valid!")
             else:
-                print("Something went wrong...\n", e_str)
+                print(f"Something went wrong...\n{e_str}")
             exit()
         self.db = db
         self.score = 0
@@ -80,7 +78,10 @@ class MainFunc:
     # --- Methods
 
     def shitpost(self):  # To shitpost a random message from three arrays
-        self.set_message_payload(shitpost())
+        self.set_message_payload(bot_functions.shitpost())
 
     def fortune(self):  # To pick a random BSD-styled fortune from a fortunes list
-        self.set_message_payload(fortune())
+        self.set_message_payload(bot_functions.fortune())
+
+    def help_com(self):  # To get help from a bot
+        self.set_message_payload(bot_functions.help_com())
