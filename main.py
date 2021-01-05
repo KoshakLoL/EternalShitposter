@@ -41,6 +41,7 @@ class MainFunc:
 
     def set_message_payload(self, text):  # Send a message to a chat
         bot_utils.msg_construct(self.vk_api, self.msg_recipient, text)
+        self.set_score(self.get_score() - 1)
 
     def set_message_recipient(self, event):  # Set peer_id (where to send the message)
         self.msg_recipient = event.obj.peer_id
@@ -89,26 +90,27 @@ class MainFunc:
 
     def fortune(self):  # To pick a random BSD-styled fortune from a fortunes list
         self.set_message_payload(bot_functions.fortune())
-        self.set_score(self.get_score() - 1)
 
     def help_com(self):  # To get help from a bot
         self.set_message_payload(bot_functions.help_com())
-        self.set_score(self.get_score() - 1)
 
     def shitpost_status(self, event):  # To turn off auto-shitpost
         # Checking if the user is an owner
-        if bot_utils.check_for_owner(self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
-                                                                                 group_id=self.group_id)["items"],
-                                     event):
-            if self.get_status() == 0:  # Turning on auto-shitpost
-                self.set_status(1)
-                self.set_message_payload("Now the bot will auto-shitpost!")
-                self.set_score(self.get_score() - 1)
-            else:  # Turning off auto-shitpost
-                self.set_status(0)
-                self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
-        else:  # If the user is not an owner
-            self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
+        try:
+            if bot_utils.check_for_owner(self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
+                                                                                     group_id=self.group_id)["items"],
+                                         event):
+                if self.get_status() == 0:  # Turning on auto-shitpost
+                    self.set_status(1)
+                    self.set_message_payload("Now the bot will auto-shitpost!")
+                else:  # Turning off auto-shitpost
+                    self.set_status(0)
+                    self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
+                    self.set_score(self.get_score() + 1)
+            else:  # If the user is not an owner
+                self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
+        except ApiError:
+            self.set_message_payload("Give the bot admin, pls. It cannot access the API :(")
 
     def check_status(self):  # To check auto-shitpost status
         if self.get_status() == 1:
