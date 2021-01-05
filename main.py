@@ -8,10 +8,14 @@ from bot_utils import msg_construct
 
 class MainFunc:
     def __init__(self, token, group_id, db):
+        print("Starting bot initialization...")
+        print("Initializing VK API...")
         self.vk_session = VkApi(token=token)  # Initializing session
         self.vk_api = self.vk_session.get_api()  # Initializing API
+        print("Ended VK API initialization!")
         self.group_id = group_id
         self.group_name = f"club{self.group_id}"
+        print("Initializing LongPoll...")
         try:
             self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)  # Initializing LongPoll API
         except ApiError as e:
@@ -23,10 +27,12 @@ class MainFunc:
             else:
                 print(f"Something went wrong...\n{e_str}")
             exit()
+        print("Ended LongPoll initialization!")
         self.db = db
         self.score = 0
         self.auto_shitpost = 1
         self.msg_recipient = ""
+        print("Ended bot initialization! Bot is up and running...")
 
     def get_event_listener(self):  # Return current events from a listener
         return self.long_poll.listen()
@@ -85,3 +91,6 @@ class MainFunc:
 
     def help_com(self):  # To get help from a bot
         self.set_message_payload(bot_functions.help_com())
+
+    def __del__(self):
+        print("Exiting bot...")

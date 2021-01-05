@@ -8,8 +8,8 @@ from os import environ
 class MainBot(BotMethods):
     def __init__(self, token, group_id, db):
         super().__init__(token, group_id, db)
-        for event in self.get_event_listener():
-            if event.type == VkBotEventType.MESSAGE_NEW:
+        for event in self.get_event_listener():  # Listening to events
+            if event.type == VkBotEventType.MESSAGE_NEW:  # If a new message pops up
                 self.set_message_recipient(event)
 
                 self.set_score(self.get_database_score())  # This is the beginning of db-local transaction
