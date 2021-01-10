@@ -5,17 +5,19 @@ from vk_api.exceptions import ApiError
 import bot_functions
 import bot_utils
 
+log = bot_utils.get_yml_logger("logging.yml", __name__)
 
-class MainFunc:
+
+class Main:
     def __init__(self, token, group_id, db):
-        print("Starting bot initialization...")
-        print("Initializing VK API...")
+        log.info("Starting bot initialization")
+        log.info(f"Initializing VK API with {token[:4]}**** token")
         self.vk_session = VkApi(token=token)  # Initializing session
         self.vk_api = self.vk_session.get_api()  # Initializing API
-        print("Ended VK API initialization!")
+        log.info("Ended VK API initialization")
         self.group_id = group_id
         self.group_name = f"club{self.group_id}"
-        print("Initializing LongPoll...")
+        log.info(f"Initializing LongPoll for {self.group_name}")
         try:
             self.long_poll = VkBotLongPoll(self.vk_session, self.group_id)  # Initializing LongPoll API
         except ApiError as e:
@@ -27,12 +29,12 @@ class MainFunc:
             else:
                 print(f"Something went wrong...\n{e_str}")
             exit()
-        print("Ended LongPoll initialization!")
+        log.info(f"Ended LongPoll initialization")
         self.db = db
         self.score = 0
         self.auto_shitpost = 1
         self.msg_recipient = ""
-        print("Ended bot initialization! Bot is up and running...")
+        log.info("Ended bot initialization! Bot is up and running...")
 
     def get_event_listener(self):  # Return current events from a listener
         return self.long_poll.listen()
@@ -41,30 +43,10 @@ class MainFunc:
 
     def set_message_payload(self, text):  # Send a message to a chat
         bot_utils.msg_construct(self.vk_api, self.msg_recipient, text)
-        self.set_score(self.get_score() - 1)
+        self.score -= 1
 
     def set_message_recipient(self, event):  # Set peer_id (where to send the message)
         self.msg_recipient = event.obj.peer_id
-
-    # --- LOCAL
-
-    # --- Score
-
-    def get_score(self):
-        return self.score
-
-    def set_score(self, score):
-        self.score = score
-
-    # --- Auto-shitpost status
-
-    def get_status(self):
-        return self.auto_shitpost
-
-    def set_status(self, status):
-        self.auto_shitpost = status
-
-    # --- DATABASE
 
     # --- Database scores
 
@@ -86,7 +68,7 @@ class MainFunc:
 
     def shitpost(self):  # To shitpost a random message from three arrays
         self.set_message_payload(bot_functions.shitpost())
-        self.set_score(1)
+        self.score = 1
 
     def fortune(self):  # To pick a random BSD-styled fortune from a fortunes list
         self.set_message_payload(bot_functions.fortune())
@@ -100,21 +82,21 @@ class MainFunc:
             if bot_utils.check_for_owner(self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
                                                                                      group_id=self.group_id)["items"],
                                          event):
-                if self.get_status() == 0:  # Turning on auto-shitpost
-                    self.set_status(1)
+                if self.auto_shitpost == 0:  # Turning on auto-shitpost
+                    self.auto_shitpost = 1
                     self.set_message_payload("Now the bot will auto-shitpost!")
                 else:  # Turning off auto-shitpost
-                    self.set_status(0)
+                    self.auto_shitpost = 0
                     self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
-                    self.set_score(self.get_score() + 1)
+                    self.score += 1
             else:  # If the user is not an owner
                 self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
         except ApiError:
             self.set_message_payload("Give the bot admin, pls. It cannot access the API :(")
 
     def check_status(self):  # To check auto-shitpost status
-        if self.get_status() == 1:
-            self.shitpost() if self.get_score() >= 10 else self.set_score(self.get_score() + 1)
+        if self.auto_shitpost == 1:
+            self.shitpost() if self.score >= 10 else setattr(self, "score", self.score + 1)
 
     def __del__(self):
-        print("Exiting bot...")
+        log.info("Exiting the bot...")

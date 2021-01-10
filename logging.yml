@@ -1,0 +1,19 @@
+version: 1
+
+formatters:
+  main_formatter:
+    format: "%(levelname)s:%(name)s:%(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: main_formatter
+
+loggers:
+  main:
+    level: INFO
+    handlers: [ console ]
+  database:
+    level: INFO
+    handlers: [ console ]

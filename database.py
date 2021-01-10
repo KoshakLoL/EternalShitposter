@@ -1,15 +1,19 @@
+import os
 import sqlite3
 
+from bot_utils import get_yml_logger
 
-class DataBase:
+log = get_yml_logger("logging.yml", __name__)
+
+
+class Database:
     def __init__(self, database_file):
-        print("Opening database...")
-        if ".db" not in database_file:
-            print("No database file in bot.py! Please add one.")
-            exit()
+        log.info(f"Opening {database_file}...")
+        if not os.path.exists(database_file):
+            raise WrongDatabaseFile(database_file)
         self.db = sqlite3.connect(database_file)
         self.cur = self.db.cursor()
-        print("Database opened!")
+        log.info("Database opened!")
 
     def update_value(self, table, column, chat_id, value):
         with self.db:
@@ -28,6 +32,12 @@ class DataBase:
         except TypeError:
             return 1
 
-    def __del__(self):
-        print("Closing database...")
+    def close_db(self):
+        log.info("Closing database...")
         self.db.close()
+
+
+class WrongDatabaseFile(Exception):
+    def __init__(self, db_file):
+        log.critical(f"{db_file} not found in {os.getcwd()}!")
+        exit()

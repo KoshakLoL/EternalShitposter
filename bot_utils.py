@@ -1,3 +1,6 @@
+import logging.config
+
+import yaml
 from vk_api.utils import get_random_id
 
 
@@ -19,3 +22,9 @@ def check_for_owner(response, event):
         ):
             return True
     return False
+
+
+def get_yml_logger(config, name):
+    with open(config, "r") as f:
+        logging.config.dictConfig(yaml.safe_load(f))
+    return logging.getLogger(name)
