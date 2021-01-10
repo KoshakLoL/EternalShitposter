@@ -1,21 +1,22 @@
-from vk_api.bot_longpoll import VkBotEventType
-
-from database import DataBase
 from os import environ
 
-from main import MainFunc
-import traceback
+from vk_api.bot_longpoll import VkBotEventType
+
+from database import Database
+from main import Main
 
 
-class MainBot(MainFunc):
+class MainBot(Main):
     def __init__(self, token, group_id, db):
         super().__init__(token, group_id, db)
+
+    def main_listen(self):
         for event in self.get_event_listener():  # Listening to events
             if event.type == VkBotEventType.MESSAGE_NEW:  # If a new message pops up
                 self.set_message_recipient(event)
 
-                self.set_score(self.get_database_score())  # This is the beginning of db-local transaction
-                self.set_status(self.get_database_status())  # This is the end of db-local transaction
+                setattr(self, "score", self.get_database_score())  # This is the beginning of db-local transaction
+                setattr(self, "auto_shitpost", self.get_database_status())  # This is the end of db-local transaction
 
                 # Local work
                 #    Check if "fortune" is in the text      Either private message event or ping in a group chat
@@ -36,15 +37,15 @@ class MainBot(MainFunc):
                 self.check_status()
                 # Local work END
 
-                self.set_database_score(self.get_score())  # This is the beginning of local-db transaction
-                self.set_database_status(self.get_status())  # This is the end of local-db transaction
+                self.set_database_score(getattr(self, "score"))  # This is the beginning of local-db transaction
+                self.set_database_status(getattr(self, "auto_shitpost"))  # This is the end of local-db transaction
 
 
 if __name__ == "__main__":
+    # Token, group_id, database
+    bot = MainBot(environ["BOT_TOKEN"], environ["VK_GROUP_ID"], Database("conf_db.db"))
     try:
-        # Token, group_id, database
-        MainBot(environ["BOT_TOKEN"], "200700644", DataBase("conf_db.db"))
-    except Exception:
-        traceback.print_exc()
-    finally:
+        bot.main_listen()
+    except KeyboardInterrupt:
+        bot.db.close_db()
         exit()
