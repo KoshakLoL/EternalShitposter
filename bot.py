@@ -11,12 +11,13 @@ class MainBot(Main):
         super().__init__(token, group_id, db)
 
     def main_listen(self):
-        for event in self.get_event_listener():  # Listening to events
+        for event in self.long_poll.listen():  # Listening to events
             if event.type == VkBotEventType.MESSAGE_NEW:  # If a new message pops up
-                self.set_message_recipient(event)
+                self.msg_recipient = event.obj.peer_id
 
-                setattr(self, "score", self.get_database_score())  # This is the beginning of db-local transaction
-                setattr(self, "auto_shitpost", self.get_database_status())  # This is the end of db-local transaction
+                self.score = self.get_database_score()  # This is the beginning of db-local transaction
+                self.auto_shitpost_limiter = self.get_database_limiter()
+                self.auto_shitpost = self.get_database_status()  # This is the end of db-local transaction
 
                 # Local work
                 #    Check if "fortune" is in the text      Either private message event or ping in a group chat
@@ -24,7 +25,10 @@ class MainBot(Main):
                     self.fortune()
                 #    Check if "auto" is in the text                 Only works in group chats and with ping
                 elif "auto" in event.obj.text.lower() and self.group_name in event.obj.text and event.from_chat:
-                    self.shitpost_status(event)
+                    if "auto limit" in event.obj.text.lower():
+                        self.shitpost_limiter(event)
+                    else:
+                        self.shitpost_status(event)
                 #    Check if "help is in the text"         Either private message event or ping in a group chat
                 elif "help" in event.obj.text.lower() and (event.from_user or self.group_name in event.obj.text):
                     self.help_com()
@@ -35,10 +39,12 @@ class MainBot(Main):
                     self.shitpost()
 
                 self.check_status()
+
                 # Local work END
 
-                self.set_database_score(getattr(self, "score"))  # This is the beginning of local-db transaction
-                self.set_database_status(getattr(self, "auto_shitpost"))  # This is the end of local-db transaction
+                self.set_database_score(self.score)  # This is the beginning of local-db transaction
+                self.set_database_limiter(self.auto_shitpost_limiter)
+                self.set_database_status(self.auto_shitpost)  # This is the end of local-db transaction
 
 
 if __name__ == "__main__":
@@ -47,5 +53,4 @@ if __name__ == "__main__":
     try:
         bot.main_listen()
     except KeyboardInterrupt:
-        bot.db.close_db()
         exit()

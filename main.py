@@ -4,6 +4,7 @@ from vk_api.exceptions import ApiError
 
 import bot_functions
 import bot_utils
+import re
 
 log = bot_utils.get_yml_logger("logging.yml", __name__)
 
@@ -33,20 +34,15 @@ class Main:
         self.db = db
         self.score = 0
         self.auto_shitpost = 1
+        self.auto_shitpost_limiter = 10
         self.msg_recipient = ""
         log.info("Ended bot initialization! Bot is up and running...")
-
-    def get_event_listener(self):  # Return current events from a listener
-        return self.long_poll.listen()
 
     # --- Messages integration
 
     def set_message_payload(self, text):  # Send a message to a chat
         bot_utils.msg_construct(self.vk_api, self.msg_recipient, text)
         self.score -= 1
-
-    def set_message_recipient(self, event):  # Set peer_id (where to send the message)
-        self.msg_recipient = event.obj.peer_id
 
     # --- Database scores
 
@@ -64,7 +60,27 @@ class Main:
     def set_database_status(self, status):
         self.db.update_value("statuses", "status", self.msg_recipient, status)
 
+    # --- Database auto-shitpost limiter
+
+    def get_database_limiter(self):
+        return self.db.get_value("limiters", self.msg_recipient)
+
+    def set_database_limiter(self, limiter):
+        self.db.update_value("limiters", "limiter", self.msg_recipient, limiter)
+
     # --- Methods
+
+    def check_owner(self, event):
+        try:
+            for entry in self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
+                                                                     group_id=self.group_id)["items"]:
+                if entry["member_id"] == event.obj.from_id and (
+                        ("is_admin" in entry and entry["is_admin"])
+                        or ("is_owner" in entry and entry["is_owner"])):
+                    return True
+        except ApiError:
+            self.set_message_payload("ApiError! Either you're not an admin, or the bot is not an admin.")
+            return False
 
     def shitpost(self):  # To shitpost a random message from three arrays
         self.set_message_payload(bot_functions.shitpost())
@@ -78,25 +94,28 @@ class Main:
 
     def shitpost_status(self, event):  # To turn off auto-shitpost
         # Checking if the user is an owner
-        try:
-            if bot_utils.check_for_owner(self.vk_api.messages.getConversationMembers(peer_id=self.msg_recipient,
-                                                                                     group_id=self.group_id)["items"],
-                                         event):
-                if self.auto_shitpost == 0:  # Turning on auto-shitpost
-                    self.auto_shitpost = 1
-                    self.set_message_payload("Now the bot will auto-shitpost!")
-                else:  # Turning off auto-shitpost
-                    self.auto_shitpost = 0
-                    self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
-                    self.score += 1
-            else:  # If the user is not an owner
-                self.set_message_payload("You're not an admin bro, get yourself some moderating privileges")
-        except ApiError:
-            self.set_message_payload("Give the bot admin, pls. It cannot access the API :(")
+        if self.check_owner(event):
+            if self.auto_shitpost == 0:  # Turning on auto-shitpost
+                self.auto_shitpost = 1
+                self.set_message_payload("Now the bot will auto-shitpost!")
+            else:  # Turning off auto-shitpost
+                self.auto_shitpost = 0
+                self.set_message_payload("Now the bot will NOT auto-shitpost... You're no fun :(")
+                self.score += 1
+
+    def shitpost_limiter(self, event):
+        if self.check_owner(event):
+            try:
+                self.auto_shitpost_limiter = int(re.compile(r"limit\s\d+").findall(event.obj.text)[0][6:])
+                self.set_message_payload(f"Current auto-shitpost limit is: {self.auto_shitpost_limiter}")
+            except IndexError:
+                self.set_message_payload("Did not specify the limit! ([bot_ping] help)")
 
     def check_status(self):  # To check auto-shitpost status
-        if self.auto_shitpost == 1:
-            self.shitpost() if self.score >= 10 else setattr(self, "score", self.score + 1)
+        if self.auto_shitpost and self.score >= self.auto_shitpost_limiter:
+            self.shitpost()
+        else:
+            self.score += 1
 
     def __del__(self):
         log.info("Exiting the bot...")

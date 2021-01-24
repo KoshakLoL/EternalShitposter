@@ -1,5 +1,6 @@
-# Database, literally
+# Database and its creator
 conf_db.db
+database_creator.py
 
 # Caches
 __pycache__/

@@ -32,7 +32,7 @@ class Database:
         except TypeError:
             return 1
 
-    def close_db(self):
+    def __del__(self):
         log.info("Closing database...")
         self.db.close()
 
